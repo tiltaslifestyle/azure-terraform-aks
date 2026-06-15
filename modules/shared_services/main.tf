@@ -36,8 +36,24 @@ resource "azurerm_key_vault" "main" {
   rbac_authorization_enabled  = true
 }
 
+# Assign the current user the Key Vault Administrator role on the Key Vault
 resource "azurerm_role_assignment" "terraform_admin" {
   scope                = azurerm_key_vault.main.id
   role_definition_name = "Key Vault Administrator"
   principal_id         = data.azurerm_client_config.current.object_id
+}
+
+# Configure diagnostic settings to send logs and metrics from the Key Vault to the Log Analytics workspace
+resource "azurerm_monitor_diagnostic_setting" "main" {
+  name                       = "diag-${substr(var.application_name, 0, 4)}-${var.environment}-${random_string.suffix.result}"
+  target_resource_id         = azurerm_key_vault.main.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+
+  enabled_log {
+    category_group = "allLogs"
+  }
+
+  enabled_metric {
+    category = "AllMetrics"
+  }
 }
