@@ -25,13 +25,24 @@ resource "tls_private_key" "vm_ssh_key" {
   rsa_bits  = 4096
 }
 
+resource "local_file" "vm_ssh_private_key" {
+  content         = tls_private_key.vm_ssh_key.private_key_pem
+  filename        = pathexpand("~/.ssh/vm_ssh_key")
+  file_permission = "0600"
+}
+
+resource "local_file" "vm_ssh_public_key" {
+  content  = tls_private_key.vm_ssh_key.public_key_openssh
+  filename = pathexpand("~/.ssh/vm_ssh_key.pub")
+}
+
 # Create the Linux virtual machine
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = "vm${var.application_name}${var.environment}"
   resource_group_name = var.resource_group_name
   location            = var.location
   zone                = "3"
-  size                = "Standard_D2s_v3" 
+  size                = "Standard_D2s_v3"
   admin_username      = "vmadmin"
   network_interface_ids = [
     azurerm_network_interface.vm_nic.id,
