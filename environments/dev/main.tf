@@ -20,11 +20,20 @@ module "network" {
   resource_group_name = azurerm_resource_group.infra.name
 }
 
-module "compute" {
-  source              = "../../modules/compute"
-  application_name    = var.application_name
-  environment         = var.environment
-  location            = var.location
-  resource_group_name = azurerm_resource_group.infra.name
-  compute_subnet_id   = module.network.compute_subnet_id
+# module "compute" {
+#   source              = "../../modules/compute"
+#   application_name    = var.application_name
+#   environment         = var.environment
+#   location            = var.location
+#   resource_group_name = azurerm_resource_group.infra.name
+#   compute_subnet_id   = module.network.compute_subnet_id
+# }
+
+module "aks" {
+  source            = "../../modules/aks"
+  application_name  = var.application_name
+  environment       = var.environment
+  location          = var.location
+  resource_group_id = azurerm_resource_group.infra.id
+  aks_subnet_id     = module.network.aks_subnet_id
 }
